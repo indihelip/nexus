@@ -1,0 +1,138 @@
+1️⃣ Prerequisites & Server Setup
+Make sure your server meets the requirements:
+
+OS: Ubuntu 20.04 / 22.04 / 24.04
+
+CPU: 2–4 cores
+
+RAM: ≥ 4 GB
+
+Disk: ≥ 50 GB
+
+Dependencies:
+
+
+sudo apt update && sudo apt upgrade -y
+sudo apt install -y build-essential pkg-config libssl-dev git protobuf-compiler curl
+
+These are foundational tools and must be installed before proceeding. 
+
+
+2️⃣ Install Rust
+Nexus CLI requires Rust:
+
+bash
+Copy
+Edit
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+export PATH="$HOME/.cargo/bin:$PATH"
+source ~/.bashrc
+
+
+
+
+
+3️⃣ Install Nexus CLI
+Run the installer script:
+
+
+curl https://cli.nexus.xyz/ | sh
+This fetches the latest CLI binary and prompts for Terms of Use acceptance.
+
+
+For non‑interactive installs (e.g., in CI):
+
+curl -sSf https://cli.nexus.xyz/ -o install.sh
+chmod +x install.sh
+NONINTERACTIVE=1 ./install.sh
+
+
+4️⃣ Retrieve Your Node ID
+Visit the Nexus dashboard: https://app.nexus.xyz/nodes
+
+Add a new CLI node and copy your Node ID
+
+On your server, register it:
+
+
+mkdir -p ~/.nexus
+echo "YOUR_NODE_ID_HERE" > ~/.nexus/node-id
+
+
+5️⃣ Run Nexus CLI in Background
+Install screen:
+
+
+sudo apt install screen -y
+Start a session:
+
+
+screen -S nexus
+Launch the CLI:
+
+
+curl https://cli.nexus.xyz/ | sh
+The CLI should detect your node-id and start proving cycles.
+
+Detach (so it runs in the background):
+
+Press Ctrl+A, then D
+
+Reattach later:
+
+
+screen -R nexus
+
+
+🛠️ 6. (Optional) Use Systemd
+For a more robust, service-based setup:
+
+Create a systemd unit (e.g., /etc/systemd/system/nexus.service):
+
+
+[Unit]
+Description=Nexus prover node
+After=network.target
+
+
+User=youruser
+ExecStart=/home/youruser/.nexus/cli-binary
+Restart=always
+
+[Install]
+WantedBy=default.target
+Enable and start it:
+
+bash
+Copy
+Edit
+sudo systemctl daemon-reload
+sudo systemctl enable nexus.service
+sudo systemctl start nexus.service
+sudo journalctl -u nexus.service -f -n 100
+
+
+✅ Quick Recap
+bash
+Copy
+Edit
+# 1. Update & install dependencies
+sudo apt update && sudo apt install -y build-essential libssl-dev protobuf-compiler curl git screen
+
+# 2. Install Rust
+curl ... | sh
+source ~/.bashrc
+
+# 3. Install Nexus CLI
+curl https://cli.nexus.xyz/ | sh
+
+# 4. Register your Node ID
+echo "YOUR_NODE_ID" > ~/.nexus/node-id
+
+# 5. Run in screen
+screen -S nexus
+curl https://cli.nexus.xyz/ | sh
+Ctrl+A D  # detach
+
+# To reattach:
+screen -R nexus
